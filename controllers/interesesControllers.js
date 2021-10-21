@@ -9,50 +9,98 @@ exports.getLugares = async (req, res) => {
 };
 
 exports.postLugares = async (req, res) => {
-  const lugar = await new dbLugares({
+  const buscado = await dbLugares.find({
     lugarInteres: req.body.lugarInteres,
-    pais: req.body.pais,
-    atractivo: req.body.atractivo,
-    contadorInteres: req.body.contadorInteres,
   });
-  lugar.save(console.log("Lugar de interes agregado"));
+  if (buscado[0]) {
+    const interes = buscado[0].contadorInteres + 1;
+    dbLugares
+      .updateOne(
+        { lugarInteres: req.body.lugarInteres },
+        {
+          $set: {
+            contadorInteres: interes,
+          },
+        }
+      )
+      .then(res.json({ estado: "interes aumentado" }));
+  } else {
+    const lugar = await new dbLugares({
+      lugarInteres: req.body.lugarInteres,
+      pais: req.body.pais,
+      atractivo: req.body.atractivo,
+      contadorInteres: req.body.contadorInteres,
+    });
+    lugar.save().then((lugarRes) => {
+      console.log("Lugar de interes agregado");
+      res.json(lugarRes);
+    });
+  }
 };
 
 exports.modificarLugares = async (req, res) => {
-  if (req.body.lugarInteresNuevo) {
-    dbLugares
-      .updateOne(
-        { lugarInteres: req.body.lugarInteresBuscado },
-        {
-          $set: {
-            lugarInteres: req.body.lugarInteresNuevo,
-          },
-        }
-      )
-      .then(console.log("Nombre del lugar de interes modificados"));
+  try {
+    if (req.body.contadorInteres) {
+      dbLugares
+        .updateOne(
+          { lugarInteres: req.body.lugarInteresBuscado },
+          {
+            $set: {
+              contadorInteres: req.body.contadorInteres,
+            },
+          }
+        )
+        .then(console.log("Interes actualizado"));
+    }
+    if (req.body.pais) {
+      dbLugares
+        .updateOne(
+          { lugarInteres: req.body.lugarInteresBuscado },
+          {
+            $set: {
+              pais: req.body.pais,
+            },
+          }
+        )
+        .then(console.log("Pais actualizado"));
+    }
+    if (req.body.atractivo) {
+      dbLugares
+        .updateOne(
+          { lugarInteres: req.body.lugarInteresBuscado },
+          {
+            $set: {
+              atractivo: req.body.atractivo,
+            },
+          }
+        )
+        .then(console.log("Atractivo actualizado"));
+    }
+    if (req.body.lugarInteresNuevo) {
+      dbLugares
+        .updateOne(
+          { lugarInteres: req.body.lugarInteresBuscado },
+          {
+            $set: {
+              lugarInteres: req.body.lugarInteresNuevo,
+            },
+          }
+        )
+        .then(console.log("Lugar actualizado"));
+    }
+    res.json({ estado: "aceptado" });
+  } catch {
+    res.json({ estado: "fallido" });
   }
-  if (req.body.pais) {
-    dbLugares
-      .updateOne(
-        { lugarInteres: req.body.lugarInteresBuscado },
-        {
-          $set: {
-            pais: req.body.pais,
-          },
-        }
-      )
-      .then(console.log("Pais del lugar de interes modificados"));
-  }
-  if (req.body.atractivo) {
-    dbLugares
-      .updateOne(
-        { lugarInteres: req.body.lugarInteresBuscado },
-        {
-          $set: {
-            atractivo: req.body.atractivo,
-          },
-        }
-      )
-      .then(console.log("Atractivo del lugar de interes modificados"));
-  }
+};
+
+exports.borrarLugares = async (req, res) => {
+  dbLugares
+    .deleteOne({
+      lugarInteres: req.body.lugarInteres,
+    })
+    .then(() => {
+      console.log("Lugar eliminado");
+      res.json({ estado: "aceptado" });
+    });
 };

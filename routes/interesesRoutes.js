@@ -8,6 +8,6 @@ router.post("/postLugaresInteres", controller.postLugares);
 
 router.post("/modificarLugaresInteres", controller.modificarLugares);
 
-// router.post("/borrarLugaresInteres", controller.borrarLugares);
+router.post("/borrarLugaresInteres", controller.borrarLugares);
 
 module.exports = router;
